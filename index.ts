@@ -1,3 +1,9 @@
+console.clear()
+
+let inputString = "aminorb9"    //this will be input from the user, from a textbox or something
+
+
+const KeyCenter = "C"     //Keycenter should be a global variable for now. This will come from input from the user. Probably a form
 
 
 interface IntervalMap {     //this is all the intervals with sharps and flats, in terms of half-steps
@@ -30,47 +36,11 @@ interface IntervalMap {     //this is all the intervals with sharps and flats, i
     "12": 19 % 12,
   };
   
-  
-  
-  
-  
-  
-  
-  const MusicalNotes: string[] = ["C", "CSharp", "D", "DSharp", "E", "F", "FSharp", "G", "GSharp", "A", "ASharp", "B"];
+  const MusicalNotes: string[] = ["c", "csharp", "d", "dsharp", "e", "f", "fsharp", "g", "gsharp", "a", "asharp", "b"];
   
             //the integer associated with each note can be accessed using the .indexOf() method 
-            // MusicalNotes.indexOf("C")   returns 0
-  
-  
-  
-  
-  
-  
-  
-  function shiftArray(arr: number[]): number[] {      //function for setInversion()
-    if (arr.length === 0) {
-      return arr; // If the array is empty, return it as is
-    }
-    const firstValue = arr.shift() as number; // Remove the first value and store it as a number
-    arr.push(firstValue); // Add the first value to the end of the array
-    return arr;
-  }
-  
-  
-  
-  function parseExtensions(extensions: string): string[] {    //sub-function
-    const regex = /([#b][0-9]+)/g;
-    const parsedExtensions = extensions.match(regex) || [];
-    return parsedExtensions;
-  }
-  
-  
-  function parseAddOrSusChords(extensions: string): string[] {  //sub-function
-    const regex = /([a-zA-Z]+[0-9]+)/g;
-    const parsedAddOrSusChord = extensions.match(regex) || [];
-    return parsedAddOrSusChord;
-  }
-  
+            // MusicalNotes.indexOf("c")   returns 0 
+
   
   function removeDuplicateStringsFromArray(arr:string[]): string[] {    //sub-function
     const result: string[] = []
@@ -81,92 +51,220 @@ interface IntervalMap {     //this is all the intervals with sharps and flats, i
     }
     return result
   }
-  
-  
-  
-  function parseAllExtensions(extensions: string): string[] {     //Primary function, for getting extensions from string
-    const alteredExtensions = parseExtensions(extensions);        
-    const standardExtensions = parseAddOrSusChords(extensions); 
-    const combinedExtensions = alteredExtensions.concat(standardExtensions);    //give it "sus4b9#11b9" and it returns ["sus4","b9","#11"]. 
-    let result: string[] = removeDuplicateStringsFromArray(combinedExtensions)
-    return result;
+
+  //bathroom code: 1 4 7 8 9  
+  //console.log(parseChordName('Cmajor7b9#11')) returns ["C", "major7", "b9#11"]
+function parseChordName(chordName: string): string[] {
+  const result: string[] = ['', '', ''];
+  const regex = /^([A-Ga-g][#b]?)([^#b\s]*\d*)(.*)$/;
+  const matches = chordName.match(regex);
+
+  if (matches) {
+    result[0] = matches[1]; // root note
+    result[1] = matches[2]; // chord type
+    result[2] = matches[3]; // extensions or alterations
   }
-  
-  
-  
-  
-  function addIntervalToChord(chord: number[], interval: string): number[] {      //not currently implimented yet.
-    const intervalValue = intervalMap[interval];
-    if (intervalValue === undefined) {
-      throw new Error(`Invalid interval: ${interval}`);
-    }
-    return [...chord, intervalValue];
-  }
-  
+  return result;  //returns [root, chord type, extensions]
+}
   
   class Chord2 {
     public notes: number[] = [];
     
-    constructor(public letterName: string, public quality: string, public extensions: string[] = []) {}  //don't HAVE to initialize yet this way
+    constructor(public root: string, public quality: string, public extensions: string[] = []) {}  //don't HAVE to initialize yet this way
   }
   
+//))))))))))))))))))))))))))))))))))))))))))OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOoo
   
   class Chord {
   
     public name: string;
-    public letterName: string;
+    public root: string;
     public quality: string;
-    public extensions: string[];
+    public extensions: string;
     public notes: number[];
     public inversion: number;
     
-    constructor(letterName: string, quality: string, extensions: string[] = [], inversion: number) {
+    constructor(root: string, quality: string, extensions: string, inversion: number) {
   
-      this.name = "CMajorsus2b9"
-      this.letterName = letterName;
-      this.quality = quality;
-      this.extensions = extensions;
+      this.name = inputString;
+      [this.root] = parseChordName(this.name);          //using destructuring assignments to get the 1st, 2nd, and 3rd return values of the function      
+      [,this.quality] = parseChordName(this.name);
+      [,,this.extensions] = parseChordName(this.name);
       this.notes = [];
       this.inversion = inversion;
   
       setRoot(this)
       setThird(this)
-      this.notes.push( (this.notes[0] +7) % 12 );   //add the fifth. Will need to be refactored to take altered and augmented chords
+      setFifth(this)
+      //this.notes.push( (this.notes[0] +7) % 12 );   //add the fifth. Will need to be refactored to take altered and augmented chords
   
       this.notes = setInversion(this.notes,this.inversion)
       
     }
     
     printName(): void {
-      console.log(this.letterName, this.quality);
+      console.log(this.root, this.quality);
     }
     
     getNotes(): number[] {
       return this.notes;
     }
   }
+
   
   
+  function findFifth(note:string): string {
+    let indexOfFifth = (MusicalNotes.indexOf(note) + 7) % 12
+    let fifth = MusicalNotes[indexOfFifth]
+    return fifth
+  };
+
+  
+
+  function getIntervalFromKeyCenter(note: string): number {
+
+    let noteAsNumber = MusicalNotes.indexOf(note)
+    let keyCenterAsNumber = MusicalNotes.indexOf(KeyCenter)
+
+    let normalizedNote = noteAsNumber % 12;
+
+    0x10 
+    let interval;
+  
+    if (normalizedNote >= keyCenterAsNumber) {
+      interval = normalizedNote - keyCenterAsNumber;
+    } else {
+      interval = 12 + (normalizedNote - keyCenterAsNumber);
+    }
+  
+    return interval;
+  };
+
+  function invertNote(note:string):string{
+
+    let result = ''
+    let tempNumber = 0
+
+    let interval = getIntervalFromKeyCenter(note)
+
+    const intervalToResult = [7, 6, 5, 4, 3, 2, 1, 12, 11, 10, 9, 8];
+
+    tempNumber = intervalToResult[interval];
+    
+    result = MusicalNotes[tempNumber]
+
+    if (result == undefined) {    //inelegant solution to an edge case. But hey, it works
+      result = note
+    };
+
+    return result
+  };
+
   
   
+
+
+  //Explanation of which chords map to what
+
+  //major <---> minor   Root is inverted fifth
+
+  //major7 <---> minor6   Root is inverted fifth
+  
+
+
+  function invertChord(chord: Chord): [string,string] {   //returns invertedRoot, invertedChordQuality
+    let root = chord.root
+    let newRoot = invertNote(findFifth(root))
+    let newQuality = invertChordQuality(chord.quality)
+    
+    return [newRoot,newQuality]
+  };
+
+  
+  function invertChordQuality(quality:string): string {
+    let result = ''
+
+    if (quality == "major"){
+      result = "minor"
+    }
+    if (quality == "minor"){
+      result = "major"
+    }
+    if (quality == "major7"){
+      result = "minorb6"
+    }
+    if (quality == "minorb6"){
+      result = "major7"
+    }
+    if (quality == "minor7"){
+      result = "major6"
+    }
+    if (quality == "major6"){
+      result = "minor7"
+    }
+    if (quality == "7"){
+      result = "minor6"
+    }
+    if (quality == "minor6"){
+      result = "7"
+    }
+    if (quality == "major9"){
+      result = "minor9"
+    }
+    if (quality == "minor9"){
+      result = "major9"
+    }
+    if (quality == "sus2"){
+      result = "sus4"
+    }
+    if (quality == "sus4"){
+      result = "sus2"
+    }
+    if (quality == "halfdiminished"){
+      result = "7"
+    }
+    if (quality == "diminished"){
+      result = "diminished"
+    }
+
+
+    return result
+
+  };
+
+
+  
+
+
   function setRoot(chord: Chord) {                              //refactor these to be methods of the chord object
-    chord.notes = [MusicalNotes.indexOf(chord.letterName)];
+    chord.notes = [MusicalNotes.indexOf(chord.root)];
   }
   
   
-  function setThird(chord: Chord) {
-    if (chord.quality == "minor") {
-      chord.notes.push((chord.notes[0] +3) % 12 );
+  function setThird(chord: Chord) {                 //this function should handle sus chord logic. Just an if (sus) then do nothing kinda thing
+    if (chord.quality.includes("minor")) {
+      chord.notes.push((chord.notes[0] +3) % 12 );  //add the minor third to chord.notes
     }
-   else if (chord.quality == "major") {
-      chord.notes.push((chord.notes[0] +4) % 12 );
+   else if (chord.quality.includes("major")) {
+      chord.notes.push((chord.notes[0] +4) % 12 );  //add the major third to chord.notes
     }
   }
+
+  function setFifth(chord: Chord) {
+    chord.notes.push((chord.notes[0] +7) % 12)
+  };
+
+    
+  function shiftArray(arr: number[]): number[] {      //function for setInversion()
+    if (arr.length === 0) {
+      return arr; // If the array is empty, return it as is
+    }
+    const firstValue = arr.shift() as number; // Remove the first value and store it as a number
+    arr.push(firstValue); // Add the first value to the end of the array
+    return arr;
+  }
   
-  
-  
-  
-  
+
   function setInversion(notes: number[], inversion: number) {   //Refactor this one in the same way
   
     if (inversion >= notes.length) {
@@ -180,40 +278,32 @@ interface IntervalMap {     //this is all the intervals with sharps and flats, i
   }
   
   
+
+  function invertNotesAroundKeyCenter(chord: Chord) {   //may use later for arrays of individual notes
+    let result: number[] = [];
+    for (let i = 0; i < chord.notes.length; i++) {
+      console.log(chord.notes[i])
+    }
+  };
+  
+  module.exports = {parseChordName,removeDuplicateStringsFromArray};
+
+  function main() {
+
+  let x = new Chord(parseChordName(inputString)[0],parseChordName(inputString)[1],parseChordName(inputString)[2],0)
+
+  //console.log(x)
+  //console.log(invertChord(x))
+  console.log(parseChordName("cmajor7b9#11"))
+  }
+
+  main()
   
   
   
-  //testing code
-  
-  
-  let x = new Chord("C","major",["b9"],1)     //need to refactor this so that the argument is just "Cmajor6b9", and from that it gets its attributes
-  
-  
-  console.log(x)
-   
-  
-  
-  
-  const KeyCenter = "C"     //Keycenter should be a global variable for now. This will come from input from the user
-  
-  
-  //end testing code
-  
-  
-  
-  
-  
-  
-  //Need to refactor the addIntervalToChord function:
-  //1. Make it accept a Chord type and an interval like b5 or something. Use the integerMap for the logic.
-  
-  //2. Have a decoupled function which will scan the chordName : "C Major7 #5 ", and do logic to provide the addIntervalToChord function with which intervals to add.
-  
-  
-  
-  
-  
-  //I think for a chord, it would be cool to be able to describe all the extensions, whatever, and then after that is defined (the set of 
-  //notes in the chord is described), I can then add a suffix like (2inv, 3inv), whatever, to describe what inversion the chord is in. So 
-  //a Cmajor#5 2nd inv would be the notes C E G G#, and then it would be E G G# C because of the 2ns inversion
-  
+  //still need to make it so capitalization doesn't matter
+
+  //the main priority right now is to actually sit down at the piano, play each chord type, and make a chart of the inversion for myself
+  //on paper. Then I can feed that information into my program.
+
+  //I want to focus on getting every chord type done for each interval, in sequence. That way I won't have to go back and forth. It would be too chaotic and messy
